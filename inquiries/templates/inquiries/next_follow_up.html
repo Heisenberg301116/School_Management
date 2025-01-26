@@ -1,0 +1,196 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Next Follow-up</title>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Next Follow-up for {{ inquiry.student_name }}</h1>
+
+        <!-- Display Follow-up Form -->
+        <form method="POST" class="follow-up-form" id="followUpForm">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+
+            <!-- Status Field -->
+            <label for="id_status">Status:</label>
+            {{ form.status }}
+
+            <!-- Conditional Date Fields -->
+            <div id="conditional-dates">
+                <div class="date-field" id="inquiry-date-field" style="display: none;">
+                    <label for="id_inquiry_date">Inquiry Date:</label>
+                    <input type="date" id="id_inquiry_date" name="inquiry_date">
+                </div>
+                <div class="date-field" id="registration-date-field" style="display: none;">
+                    <label for="id_registration_date">Registration Date:</label>
+                    <input type="date" id="id_registration_date" name="registration_date">
+                </div>
+                <div class="date-field" id="admission-test-date-field" style="display: none;">
+                    <label for="id_admission_test_date">Admission Test Date:</label>
+                    <input type="date" id="id_admission_test_date" name="admission_test_date">
+                </div>
+                <div class="date-field" id="admission-offered-date-field" style="display: none;">
+                    <label for="id_admission_offered_date">Admission Offered Date:</label>
+                    <input type="date" id="id_admission_offered_date" name="admission_offered_date">
+                </div>
+                <div class="date-field" id="admission-confirmed-date-field" style="display: none;">
+                    <label for="id_admission_confirmed_date">Admission Confirmed Date:</label>
+                    <input type="date" id="id_admission_confirmed_date" name="admission_confirmed_date">
+                </div>
+                <div class="date-field" id="rejected-date-field" style="display: none;">
+                    <label for="id_rejected_date">Rejected Date:</label>
+                    <input type="date" id="id_rejected_date" name="rejected_date">
+                </div>
+            </div>
+
+            <!-- Remarks Field -->
+            <label for="id_remarks">Remarks:</label>
+            {{ form.remarks }}
+
+            <!-- Assigned Agent Field -->
+            <label for="id_assigned_agent">Assigned Agent:</label>
+            {{ form.assigned_agent }}
+
+            <!-- Admin Assigned Field -->
+            <label for="id_admin_assigned">Admin Assigned:</label>
+            {{ form.admin_assigned }}
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn-submit">Submit Follow-up</button>
+        </form>
+
+        <!-- Back to List Link -->
+        <div class="navigation">
+            <a href="{% url 'inquiry_list' %}" class="btn-back">Back to Inquiry List</a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Reference to the status field
+            const statusField = document.querySelector("#id_status");
+
+            // Map of status values to corresponding date field IDs
+            const dateFieldMapping = {
+                Inquiry: "inquiry-date-field",
+                Registration: "registration-date-field",
+                "Admission Test": "admission-test-date-field",
+                "Admission Offered": "admission-offered-date-field",
+                "Admission Confirmed": "admission-confirmed-date-field",
+                Rejected: "rejected-date-field"
+            };
+
+            // Function to update the visibility of date fields
+            function updateDateFields() {
+                const selectedStatus = statusField.value; // Get the selected status
+                const allDateFields = document.querySelectorAll(".date-field");
+
+                // Hide all date fields initially
+                allDateFields.forEach(field => {
+                    field.style.display = "none";
+                });
+
+                // Show the relevant date field for the selected status
+                if (dateFieldMapping[selectedStatus]) {
+                    const relevantField = document.getElementById(dateFieldMapping[selectedStatus]);
+                    if (relevantField) {
+                        relevantField.style.display = "block";
+                    }
+                }
+            }
+
+            // Update fields on page load
+            updateDateFields();
+
+            // Attach an event listener to handle changes in the status field
+            statusField.addEventListener("change", updateDateFields);
+        });
+    </script>
+
+    <style>
+        /* General Styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        /* Form Styling */
+        .follow-up-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .follow-up-form input,
+        .follow-up-form select,
+        .follow-up-form textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .follow-up-form textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn-submit {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .btn-submit:hover {
+            background-color: #0056b3;
+        }
+
+        /* Back Button */
+        .navigation {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .btn-back {
+            text-decoration: none;
+            color: #007BFF;
+            font-size: 14px;
+        }
+
+        .btn-back:hover {
+            text-decoration: underline;
+        }
+    </style>
+</body>
+
+</html>

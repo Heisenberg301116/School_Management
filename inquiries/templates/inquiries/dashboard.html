@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <style>
+        /* General Styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+
+        h1, h2 {
+            color: #333;
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            text-align: center;
+        }
+
+        li {
+            display: inline-block;
+            margin: 10px 15px;
+        }
+
+        a {
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+        }
+
+        a:hover {
+            color: #0056b3;
+            text-decoration: underline;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Dashboard</h1>
+        
+        <!-- Navigation Links -->
+        <ul>
+            <li><a href="{% url 'inquiry_list' %}">View Inquiries</a></li>
+            <li><a href="{% url 'add_inquiry' %}">Add New Inquiry</a></li>
+            <li><a href="{% url 'agent_performance' %}">Agent Performance</a></li>
+            <li><a href="{% url 'export_inquiries_csv' %}">Export Inquiries to Excel</a></li>
+            <li><a href="{% url 'remove_lead' %}">Remove Agent from Lead</a></li>
+            <li><a href="{% url 'assign_lead' %}">Assign Lead to Agent</a></li>
+            <li><a href="{% url 'agent_list' %}">View Agents</a></li>
+            <li><a href="{% url 'add_agent' %}">Add Agent</a></li>
+        </ul>
+
+
+
+        <!-- Current Status -->
+        <h2>Current Status:</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Count</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Inquiries</td>
+                    <td>{{ total_inquiries }}</td>
+                </tr>
+                <tr>
+                    <td>Registrations</td>
+                    <td>{{ total_registrations }}</td>
+                </tr>
+                <tr>
+                    <td>Admission Tests</td>
+                    <td>{{ total_tests }}</td>
+                </tr>
+                <tr>
+                    <td>Admissions Offered</td>
+                    <td>{{ total_admissions_offered }}</td>
+                </tr>
+                <tr>
+                    <td>Admissions Confirmed</td>
+                    <td>{{ total_admissions_confirmed }}</td>
+                </tr>
+                <tr>
+                    <td>Rejected</td>
+                    <td>{{ rejected }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Today's Status -->
+        <h2>Today's Status:</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Today's Count</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Inquiries</td>
+                    <td>{{ inquiries_today }}</td>
+                </tr>
+                <tr>
+                    <td>Registrations</td>
+                    <td>{{ registrations_today }}</td>
+                </tr>
+                <tr>
+                    <td>Admission Tests</td>
+                    <td>{{ tests_today }}</td>
+                </tr>
+                <tr>
+                    <td>Admissions Offered</td>
+                    <td>{{ admissions_offered_today }}</td>
+                </tr>
+                <tr>
+                    <td>Admissions Confirmed</td>
+                    <td>{{ admissions_confirmed_today }}</td>
+                </tr>
+                <tr>
+                    <td>Rejected</td>
+                    <td>{{ rejected_today }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Detailed Stats -->
+        <h2>Detailed Statistics</h2>
+
+        <!-- Inquiries by Class -->
+        <h3>Inquiries by Class:</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Class</th>
+                    <th>Inquiries Count</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for inquiry in inquiries_by_class %}
+                <tr>
+                    <td>{{ inquiry.student_class }}</td>
+                    <td>{{ inquiry.total }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Inquiries by Source -->
+        <h3>Inquiries by Source:</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Source</th>
+                    <th>Inquiries Count</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for source in inquiries_by_source %}
+                <tr>
+                    <td>{{ source.inquiry_source }}</td>
+                    <td>{{ source.total }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Inquiries by Location -->
+        <h3>Inquiries by Location:</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Location</th>
+                    <th>Inquiries Count</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for location in inquiries_by_location %}
+                <tr>
+                    <td>{{ location.location_tag__name }}</td>
+                    <td>{{ location.total }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Recent Inquiries -->
+        <h3>Recent Inquiries:</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Source</th>
+                    <th>Class</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for inquiry in recent_inquiries %}
+                <tr>
+                    <td>{{ inquiry.inquiry_date }}</td>
+                    <td>{{ inquiry.inquiry_source }}</td>
+                    <td>{{ inquiry.student_class }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>        
+    </div>
+</body>
+
+</html>

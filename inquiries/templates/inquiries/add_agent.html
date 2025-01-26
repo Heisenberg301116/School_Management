@@ -1,0 +1,137 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Agent</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Add New Agent</h1>
+
+        <!-- Display success or error message -->
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="alert {% if message.tags %}{{ message.tags }}{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Form to add agent -->
+        <form method="POST" class="agent-form">
+            {% csrf_token %}
+            {{ form.as_p }} <!-- Render the form fields as paragraphs -->
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn-submit">Add Agent</button>
+        </form>
+
+        <!-- Back to the previous page or list -->
+        <div class="navigation">
+            <a href="{% url 'agent_list' %}" class="btn-back">Back to Agent List</a>
+        </div>
+    </div>
+
+    <style>
+        /* General Styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        /* Form Styling */
+        .agent-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .agent-form input,
+        .agent-form select,
+        .agent-form textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .agent-form textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn-submit {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .btn-submit:hover {
+            background-color: #45a049;
+        }
+
+        /* Back Button */
+        .navigation {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .btn-back {
+            text-decoration: none;
+            color: #007BFF;
+            font-size: 14px;
+        }
+
+        .btn-back:hover {
+            text-decoration: underline;
+        }
+
+        /* Messages Styling */
+        .messages .alert {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .messages .alert.success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .messages .alert.error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</body>
+
+</html>

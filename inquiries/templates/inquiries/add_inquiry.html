@@ -1,0 +1,180 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Inquiry</title>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Add New Inquiry</h1>
+
+        <!-- Display Form -->
+        <form method="POST" class="inquiry-form">
+            {% csrf_token %}
+            
+            <!-- Other Fields -->
+            {{ form.student_name.label }} {{ form.student_name }}
+            {{ form.parent_name.label }} {{ form.parent_name }}
+            {{ form.mobile_number.label }} {{ form.mobile_number }}
+            {{ form.email.label }} {{ form.email }}
+            {{ form.address.label }} {{ form.address }}
+            {{ form.location_tag.label }} {{ form.location_tag }}
+            {{ form.inquiry_source.label }} {{ form.inquiry_source }}
+            {{ form.student_class.label }} {{ form.student_class }}
+            {{ form.status.label }} {{ form.status }}
+            {{ form.remarks.label }} {{ form.remarks }}
+
+            <!-- New Fields -->
+            {{ form.assigned_agent.label }} {{ form.assigned_agent }}
+            {{ form.admin_assigned.label }} {{ form.admin_assigned }}
+
+            <!-- Date Fields -->
+            <div id="inquiry-date" class="date-field" style="display: none;">
+                {{ form.inquiry_date.label }} {{ form.inquiry_date }}
+            </div>
+            <div id="follow-up-date" class="date-field" style="display: none;">
+                {{ form.follow_up_date.label }} {{ form.follow_up_date }}
+            </div>
+            <div id="registration-date" class="date-field" style="display: none;">
+                {{ form.registration_date.label }} {{ form.registration_date }}
+            </div>
+            <div id="admission-test-date" class="date-field" style="display: none;">
+                {{ form.admission_test_date.label }} {{ form.admission_test_date }}
+            </div>
+            <div id="admission-offered-date" class="date-field" style="display: none;">
+                {{ form.admission_offered_date.label }} {{ form.admission_offered_date }}
+            </div>
+            <div id="admission-confirmed-date" class="date-field" style="display: none;">
+                {{ form.admission_confirmed_date.label }} {{ form.admission_confirmed_date }}
+            </div>
+            <div id="rejected-date" class="date-field" style="display: none;">
+                {{ form.rejected_date.label }} {{ form.rejected_date }}
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn-submit">Submit Inquiry</button>
+        </form>
+
+        <!-- Navigation Link -->
+        <div class="navigation">
+            <a href="{% url 'inquiry_list' %}" class="btn-back">Back to Inquiry List</a>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // Get the status field and all date fields
+        const statusField = document.querySelector('select[name="status"]');
+        const dateFields = {
+            'Inquiry': document.getElementById('inquiry-date'),
+            'Follow Up': document.getElementById('follow-up-date'),
+            'Registration': document.getElementById('registration-date'),
+            'Admission Test': document.getElementById('admission-test-date'),
+            'Admission Offered': document.getElementById('admission-offered-date'),
+            'Admission Confirmed': document.getElementById('admission-confirmed-date'),
+            'Rejected': document.getElementById('rejected-date'),
+        };
+
+        // Function to show only the relevant date field
+        function updateDateFields() {
+            const selectedStatus = statusField.value;
+
+            // Hide all date fields
+            Object.values(dateFields).forEach(field => field.style.display = 'none');
+
+            // Show the field corresponding to the selected status
+            if (dateFields[selectedStatus]) {
+                dateFields[selectedStatus].style.display = 'block';
+            }
+        }
+
+        // Initialize the visibility on page load
+        updateDateFields();
+
+        // Add event listener for changes in the status field
+        statusField.addEventListener('change', updateDateFields);
+    </script>
+
+    <style>
+        /* General Styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        /* Form Styling */
+        .inquiry-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .inquiry-form input, 
+        .inquiry-form select, 
+        .inquiry-form textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .inquiry-form textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn-submit {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .btn-submit:hover {
+            background-color: #45a049;
+        }
+
+        /* Back Button */
+        .navigation {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .btn-back {
+            text-decoration: none;
+            color: #007BFF;
+            font-size: 14px;
+        }
+
+        .btn-back:hover {
+            text-decoration: underline;
+        }
+    </style>
+</body>
+</html>

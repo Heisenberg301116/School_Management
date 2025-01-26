@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Performance</title>
+    <style>
+        /* Add styles here */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+
+        h1, h2 {
+            color: #333;
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        .highlight {
+            background-color: #d1ffd6;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Agent Performance Overview</h1>
+
+        <h2>Performance Metrics</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Agent</th>
+                    <th>Total Leads</th>
+                    <th>Leads Converted to Registration</th>
+                    <th>Leads Converted to Admission Offered</th>
+                    <th>Leads Converted to Admission Confirmed</th>
+                    <th>Leads Rejected</th>
+                    <th>Conversion Rate (%)</th>
+                    <th>Follow-up Efficiency (%)</th>
+                    <th>Average Time to Conversion (days)</th>
+                    <th>Leads in Pending Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for agent in agent_data %}
+                <tr class="{% if forloop.first %}highlight{% endif %}">
+                    <td>{{ agent.agent.name }}</td>
+                    <td>{{ agent.total_leads }}</td>
+                    <td>{{ agent.leads_to_registration }}</td>
+                    <td>{{ agent.leads_to_admission_offered }}</td>
+                    <td>{{ agent.leads_to_admission_confirmed }}</td>
+                    <td>{{ agent.leads_rejected }}</td>
+                    <td>{{ agent.conversion_rate|floatformat:2 }}</td>
+                    <td>{{ agent.follow_up_efficiency|floatformat:2 }}</td>
+                    <td>{{ agent.average_days_to_conversion|floatformat:2 }}</td>
+                    <td>{{ agent.leads_in_pending }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+
+</html>

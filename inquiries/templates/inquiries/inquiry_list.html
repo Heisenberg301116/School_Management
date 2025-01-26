@@ -1,0 +1,138 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inquiry List</title>
+</head>
+
+<body>
+    <h1>Inquiry List</h1>
+
+    <!-- Search and Filter Form -->
+    <form method="get">
+        <input type="text" name="q" placeholder="Search by name, parent, or mobile number" value="{{ request.GET.q }}">
+        
+        <!-- Student Class Filter -->
+        <select name="student_class">
+            <option value="">All Classes</option>
+            {% for student_class in student_classes %}
+            <option value="{{ student_class }}" {% if request.GET.student_class == student_class %}selected{% endif %}>
+                {{ student_class }}
+            </option>
+            {% endfor %}
+        </select>
+
+        <!-- Status Filter -->
+        <select name="status">
+            <option value="">All Statuses</option>
+            {% for status in statuses %}
+            <option value="{{ status }}" {% if request.GET.status == status %}selected{% endif %}>
+                {{ status }}
+            </option>
+            {% endfor %}
+        </select>
+
+        <!-- Agent Filter -->
+        <select name="agent">
+            <option value="">All Agents</option>
+            {% for agent in agents %}
+            <option value="{{ agent.id }}" {% if request.GET.agent == agent.id|stringformat:"s" %}selected{% endif %}>
+                {{ agent.name }}
+            </option>
+            {% endfor %}
+        </select>
+
+        <!-- Location Tag Filter -->
+        <select name="location_tag">
+            <option value="">All Locations</option>
+            {% for location in locations %}
+            <option value="{{ location.id }}" {% if request.GET.location_tag == location.id|stringformat:"s" %}selected{% endif %}>
+                {{ location }}
+            </option>
+            {% endfor %}
+        </select>
+
+        <!-- Inquiry Source Filter -->
+        <select name="inquiry_source">
+            <option value="">All Sources</option>
+            {% for source in inquiry_sources %}
+            <option value="{{ source }}" {% if request.GET.inquiry_source == source %}selected{% endif %}>
+                {{ source }}
+            </option>
+            {% endfor %}
+        </select>
+
+        <!-- Admin Assigned Filter -->
+        <select name="admin_assigned">
+            <option value="">All Admins</option>
+            {% for admin in admins %}
+            <option value="{{ admin.id }}" {% if request.GET.admin_assigned == admin.id|stringformat:"s" %}selected{% endif %}>
+                {{ admin.username }}
+            </option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Filter</button>
+        <a href="{% url 'inquiry_list' %}">Reset Filters</a>
+    </form>
+
+    <a href="{% url 'add_inquiry' %}">Add New Inquiry</a>
+
+    <!-- Inquiry Table -->
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Student Name</th>
+                <th>Parent Name</th>
+                <th>Mobile Number</th>
+                <th>Address</th>
+                <th>Inquiry Source</th>
+                <th>Student Class</th>
+                <th>Follow-up Date</th>
+                <th>Status</th>
+                <th>Agent</th>
+                <th>Location Tag</th>
+                <th>Admin Assigned</th>
+                <th>Actions</th>
+                <th>Delete</th> <!-- New Delete Column -->
+            </tr>
+        </thead>
+        <tbody>
+            {% for inquiry in inquiries %}
+            <tr>
+                <td>{{ inquiry.student_name }}</td>
+                <td>{{ inquiry.parent_name }}</td>
+                <td>{{ inquiry.mobile_number }}</td>
+                <td>{{ inquiry.address }}</td>
+                <td>{{ inquiry.inquiry_source }}</td>
+                <td>{{ inquiry.student_class }}</td>
+                <td>{{ inquiry.follow_up_date }}</td>
+                <td>{{ inquiry.status }}</td>
+                <td>{{ inquiry.assigned_agent.name|default:"UNASSIGNED" }}</td>
+                <td>{{ inquiry.location_tag.name|default:"UNASSIGNED" }}</td>
+                <td>{{ inquiry.admin_assigned.username|default:"Not Assigned" }}</td>
+                <td>
+                    <a href="{% url 'update_status' inquiry.id %}">Manage Status</a>
+                </td>
+                <td>
+                    <!-- Delete Link -->
+                    <a href="{% url 'delete_inquiry' inquiry.id %}" style="color: red;" onclick="return confirm('Are you sure you want to delete this inquiry?')">Delete</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="13">No inquiries available.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{% url 'export_inquiries_csv' %}">Export to CSV</a>
+</body>
+
+</html>

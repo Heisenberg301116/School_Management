@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Remove Lead</title>
+    <style>
+        /* General Styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        button {
+            background-color: #ff4d4f;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #e63946;
+        }
+
+        .error {
+            color: red;
+            font-size: 14px;
+        }
+
+        .success {
+            color: green;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Remove Lead from Agent</h1>
+
+        <!-- Display Success or Error Messages -->
+        {% if messages %}
+        <div>
+            {% for message in messages %}
+            <p class="{{ message.tags }}">{{ message }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Form for Removing Lead -->
+        <form method="POST">
+            {% csrf_token %}
+
+            <!-- Agent Dropdown -->
+            <label for="agent">Select Agent:</label>
+            <select id="agent" name="agent" onchange="showLeads(this.value)">
+                <option value="">--Select Agent--</option>
+                {% for agent in agents %}
+                <option value="{{ agent.id }}">{{ agent.name }}</option>
+                {% endfor %}
+            </select>
+
+            <!-- Leads Section -->
+            <div id="leads">
+                {% for agent in agents %}
+                <div id="agent-{{ agent.id }}" style="display: none;">
+                    <label for="lead-{{ agent.id }}">Select Lead:</label>
+                    <select id="lead-{{ agent.id }}" name="lead_id" disabled>
+                        <option value="">--Select Lead--</option>
+                        {% for lead in agent.lead_set.all %}
+                        <option value="{{ lead.id }}">{{ lead.student_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit">Remove Lead</button>
+        </form>
+    </div>
+
+    <script>
+        function showLeads(agentId) {
+            // Hide and disable all lead dropdowns
+            document.querySelectorAll('#leads > div').forEach(div => {
+                div.style.display = 'none';
+                const select = div.querySelector('select');
+                if (select) select.disabled = true;
+            });
+
+            // Show and enable the selected agent's leads
+            if (agentId) {
+                const selectedDiv = document.getElementById('agent-' + agentId);
+                if (selectedDiv) {
+                    selectedDiv.style.display = 'block';
+                    const select = selectedDiv.querySelector('select');
+                    if (select) select.disabled = false;
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>
