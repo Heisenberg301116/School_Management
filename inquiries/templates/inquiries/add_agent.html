@@ -50,65 +50,79 @@
         }
 
         .container {
-            max-width: 600px;
+            max-width: 100%;
             margin: auto;
             padding: 20px;
             background-color: white;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 700px;
         }
 
         h1 {
             text-align: center;
             color: #333;
+            font-size: 24px;
+            margin-bottom: 30px; /* Increased space below the title */
         }
 
         /* Form Styling */
         .agent-form {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 20px; /* Increased gap between form fields */
+        }
+
+        .agent-form p {
+            margin-bottom: 15px; /* Space between form fields */
         }
 
         .agent-form input,
         .agent-form select,
         .agent-form textarea {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             border: 1px solid #ccc;
             border-radius: 4px;
-            font-size: 14px;
+            font-size: 16px;
+            box-sizing: border-box;
+            margin-top: 10px;
         }
 
         .agent-form textarea {
             resize: vertical;
-            min-height: 100px;
+            min-height: 120px;
         }
 
+        /* Submit Button Styling */
         .btn-submit {
             background-color: #4CAF50;
             color: white;
             border: none;
-            padding: 10px 15px;
+            padding: 14px 25px;
             border-radius: 4px;
-            font-size: 16px;
+            font-size: 18px; /* Increased font size */
+            font-weight: bold; /* Made font bold */
             cursor: pointer;
+            transition: background-color 0.3s ease;
         }
 
         .btn-submit:hover {
             background-color: #45a049;
         }
 
-        /* Back Button */
+        /* Back Button Styling */
         .navigation {
-            margin-top: 20px;
+            margin-top: 30px;
             text-align: center;
         }
 
         .btn-back {
             text-decoration: none;
             color: #007BFF;
-            font-size: 14px;
+            font-size: 18px; /* Increased font size */
+            font-weight: bold; /* Made font bold */
         }
 
         .btn-back:hover {
@@ -117,9 +131,10 @@
 
         /* Messages Styling */
         .messages .alert {
-            margin-bottom: 10px;
-            padding: 10px;
+            margin-bottom: 15px;
+            padding: 12px;
             border-radius: 4px;
+            font-size: 16px;
         }
 
         .messages .alert.success {
@@ -130,6 +145,50 @@
         .messages .alert.error {
             background-color: #f8d7da;
             color: #721c24;
+        }
+
+        /* Responsive Styling */
+        @media screen and (max-width: 768px) {
+            h1 {
+                font-size: 22px;
+                margin-bottom: 25px;
+            }
+
+            .container {
+                padding: 20px;
+            }
+
+            .agent-form {
+                gap: 20px;
+            }
+
+            .btn-submit {
+                padding: 12px 20px;
+                font-size: 16px;
+            }
+
+            .btn-back {
+                font-size: 16px;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+
+            .btn-submit {
+                padding: 10px 18px;
+                font-size: 16px;
+            }
+
+            .messages .alert {
+                font-size: 14px;
+            }
+
+            .btn-back {
+                font-size: 14px;
+            }
         }
     </style>
 </body>

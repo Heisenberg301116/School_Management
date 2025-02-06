@@ -7,58 +7,109 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Assign Lead</title>
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
+
+    <!-- jQuery (required for Select2) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Select2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
+
     <style>
         /* General Styling */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 20px;
-            background-color: #f9f9f9;
+            background-color: #f4f7fc;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         h2 {
             text-align: center;
             color: #333;
+            font-size: 28px;
+            margin-bottom: 20px;
         }
 
         .form-container {
-            max-width: 500px;
-            margin: 0 auto;
-            padding: 20px;
+            width: 100%;
+            max-width: 600px;
             background: white;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
         }
 
+        /* Form Styling */
         .form-group {
             margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
         }
 
         label {
             font-weight: bold;
-            display: block;
-            margin-bottom: 5px;
+            font-size: 16px;
+            margin-bottom: 6px;
         }
 
-        select, button {
+        select {
             width: 100%;
             padding: 10px;
-            font-size: 1rem;
+            font-size: 16px;
             border: 1px solid #ccc;
-            border-radius: 5px;
+            border-radius: 6px;
+            background-color: #fafafa;
             box-sizing: border-box;
         }
 
-        select:focus, button:focus {
+        select:focus {
             border-color: #007bff;
             outline: none;
         }
 
+        /* Select2 Specific Styling */
+        .select2-container {
+            width: 100% !important;
+        }
+
+        .select2-selection {            
+            font-size: 16px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            background-color: #fafafa;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
+        /* Button Styling */
         button {
+            width: 100%;
+            padding: 12px;
+            font-size: 18px;
+            border: none;
+            border-radius: 6px;
             background-color: #007bff;
             color: white;
-            border: none;
+            font-weight: 600;
             cursor: pointer;
+            transition: background-color 0.3s ease;
             margin-top: 10px;
         }
 
@@ -66,23 +117,81 @@
             background-color: #0056b3;
         }
 
+        /* Back Link */
         .btn-secondary {
-            display: block;
-            text-align: center;
-            margin-top: 20px;
+            display: inline-block;  /* Ensures width matches text */
+            padding: 10px 15px;  /* Adds some spacing */
             color: #007bff;
             text-decoration: none;
             font-weight: bold;
+            font-size: 16px;
+            border-radius: 6px;
+            text-align: center;
         }
-
+        
         .btn-secondary:hover {
             color: #0056b3;
             text-decoration: underline;
         }
+        
+        /* Centering the button */
+        .center-btn {
+            text-align: center;  /* Centers inline elements inside */
+            margin-top: 20px;  /* Adds spacing */
+        }
+        
+
+        /* Responsive Styles */
+        @media screen and (max-width: 768px) {
+            .form-container {
+                padding: 15px;
+            }
+
+            h2 {
+                font-size: 24px;
+            }
+
+            label {
+                font-size: 14px;
+            }
+
+            select,
+            button {
+                font-size: 14px;
+                padding: 10px;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .form-container {
+                padding: 10px;
+            }
+
+            h2 {
+                font-size: 22px;
+            }
+
+            label {
+                font-size: 14px;
+            }
+
+            select,
+            button {
+                font-size: 14px;
+                padding: 8px;
+            }
+
+            .btn-secondary {
+                font-size: 14px;
+            }
+        }
     </style>
+
 </head>
 
 <body>
+
+
     <h2>Assign Lead to Agent</h2>
 
     <div class="form-container">
@@ -96,7 +205,7 @@
                     <option value="" disabled selected>-- Select Lead --</option>
                     {% for inquiry in inquiries %}
                         <option value="{{ inquiry.id }}">
-                            {{ inquiry.student_name }}
+                            {{ inquiry.student_name }} ({{ inquiry.email }})
                         </option>
                     {% endfor %}
                 </select>
@@ -108,7 +217,9 @@
                 <select name="agent_id" id="agent" required>
                     <option value="" disabled selected>-- Select Agent --</option>
                     {% for agent in agents %}
-                        <option value="{{ agent.id }}">{{ agent.name }}</option>
+                        <option value="{{ agent.id }}">
+                            {{ agent.name }} - {{ agent.email }}
+                        </option>
                     {% endfor %}
                 </select>
             </div>
@@ -118,8 +229,54 @@
         </form>
 
         <!-- Back Link -->
-        <a href="{% url 'inquiry_list' %}" class="btn-secondary">Back to Inquiry List</a>
+        <div class="center-btn">
+            <a href="{% url 'inquiry_list' %}" class="btn-secondary">Back to Inquiry List</a>
+        </div>
+        
     </div>
+
+    <script>
+        // Initialize Select2 for dropdowns
+        $(document).ready(function () {
+            $('#inquiry, #agent').select2({
+                placeholder: "Select an option",
+                allowClear: true
+            });
+        });
+    </script>
+
+
+    <script>
+        $(document).ready(function () {
+            // Initialize Select2 with proper settings
+            $('#inquiry').select2({
+                placeholder: "Select Lead",
+                allowClear: true,
+                closeOnSelect: false // Keep dropdown open for multiple selection cases
+            });
+    
+            $('#agent').select2({
+                placeholder: "Select Agent",
+                allowClear: true,
+                closeOnSelect: false // Keep dropdown open for multiple selection cases
+            });
+    
+            // Force close Select2 when clicking outside
+            $(document).on('click', function (e) {
+                if (!$(e.target).closest('.select2-container').length) {
+                    $('#inquiry').select2('close');
+                    $('#agent').select2('close');
+                }
+            });
+    
+            // Ensure dropdown closes when an option is selected
+            $('#inquiry, #agent').on('select2:select', function () {
+                $(this).select2('close');
+            });
+        });
+    </script>
+    
+
 </body>
 
 </html>

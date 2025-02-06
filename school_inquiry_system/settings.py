@@ -26,7 +26,7 @@ SECRET_KEY = 'c4^!-5ex8dm^m_f_4dwizn9i)!tzjc@!v@8*4pa!l&h4na7^lq'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['dejawoo.site', '44.220.151.122', '127.0.0.1']
 
 
 # Application definition
@@ -134,3 +134,8 @@ EMAIL_HOST_USER = 'sushant889427@gmail.com'  # Your email address
 EMAIL_HOST_PASSWORD = 'tcba fufl dzlp pevd'  # Your email account's app-specific password
 CITIES_LIGHT_TRANSLATION_LANGUAGES = ['en']
 CITIES_LIGHT_INCLUDE_COUNTRIES = ['IN']
+
+
+LOGIN_URL = '/inquiries/login/'
+LOGIN_REDIRECT_URL = '/inquiries/list/'
+AUTHENTICATION_BACKENDS = ['inquiries.auth_backends.EmailBackend', 'django.contrib.auth.backends.ModelBackend']

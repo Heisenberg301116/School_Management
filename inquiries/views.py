@@ -1,9 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from .models import Lead, Agent
 from cities_light.models import City
 from .forms import InquiryForm, ManageLeadStatusForm, ReassignLeadForm, RemoveAgentForm, AgentForm
 from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, login
 from datetime import date, timedelta
 import csv
 from django.http import HttpResponse
@@ -13,11 +14,55 @@ from django.contrib import messages
 from openpyxl import Workbook
 from django.db.models import Count, Q, DateField, F
 from django.db.models.functions import TruncDate
+from django.conf import settings
+
+
+
+# Function to check if user is admin
+def is_admin(user):
+    return user.is_authenticated and user.is_staff  # Only allow staff users (admins)
+
+
+
+def agent_login(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+
+        # Authenticate user based on email and password
+        user = authenticate(request, username=email, password=password)
+
+        if user is not None:
+            if user.is_staff:  # Check if user is admin (staff user)
+                print("===============> Admin logged in\n")
+                login(request, user)
+                return redirect('dashboard')  # Redirect to the admin dashboard (or any other page)
+
+            try:
+                print("===============> Agent logged in\n")
+                # Check if the authenticated user is an Agent
+                agent = user.agent  # This will work only for users who are agents
+                login(request, user)
+                return redirect('inquiry_list')  # Redirect to the agent's dashboard or inquiry list
+            except Agent.DoesNotExist:
+                messages.error(request, 'This account is not an agent.')
+                return redirect('agent_login')  # Stay on the login page
+
+        else:
+            messages.error(request, 'Invalid email or password.')
+
+    return render(request, 'inquiries/agent_login.html')
+
 
 
 @login_required
 def inquiry_list(request):
-    inquiries = Lead.objects.all()
+    user = request.user
+    if user.is_staff:  # Admins can see all inquiries
+        inquiries = Lead.objects.all()
+    else:  # Agents can only see inquiries where they are the assigned agent
+        # Ensure that the user is an agent and filter based on the assigned_agent
+        inquiries = Lead.objects.filter(assigned_agent__user=user)
     
     # Search and filtering logic
     search_query = request.GET.get('q', '')
@@ -75,7 +120,9 @@ def inquiry_list(request):
 
 
 
+
 @login_required
+@user_passes_test(is_admin)
 def add_inquiry(request):
     if request.method == 'POST':
         form = InquiryForm(request.POST)
@@ -102,6 +149,7 @@ def add_inquiry(request):
     else:
         form = InquiryForm()
     return render(request, 'inquiries/add_inquiry.html', {'form': form})
+
 
 
 @login_required
@@ -141,6 +189,7 @@ def manage_lead_status(request, inquiry_id):
 
 
 @login_required
+@user_passes_test(is_admin)  # Restrict access to admins
 def remove_agent_view(request):
     if request.method == 'POST':
         # print("===============> request.POST = ",request.POST)
@@ -169,40 +218,47 @@ def remove_agent_view(request):
 
 @login_required
 def dashboard(request):
-    # Overall Counts
-    total_inquiries = Lead.objects.filter(status='Inquiry').count()
-    total_registrations = Lead.objects.filter(status='Registration').count()
-    total_tests = Lead.objects.filter(status='Admission Test').count()
-    total_admissions_offered = Lead.objects.filter(status='Admission Offered').count()
-    total_admissions_confirmed = Lead.objects.filter(status='Admission Confirmed').count()
-    rejected = Lead.objects.filter(status='Rejected').count()
-        
+    user = request.user  # Get the logged-in user
 
+    # Get all inquiries if user is admin, else filter by assigned_agent
+    if user.is_staff:  
+        inquiries = Lead.objects.all()  # Admin sees all
+    else:
+        inquiries = Lead.objects.filter(assigned_agent__user=user)  # Agent sees only their assigned inquiries
+
+    # Overall Counts
+    total_inquiries = inquiries.filter(status='Inquiry').count()
+    total_registrations = inquiries.filter(status='Registration').count()
+    total_tests = inquiries.filter(status='Admission Test').count()
+    total_admissions_offered = inquiries.filter(status='Admission Offered').count()
+    total_admissions_confirmed = inquiries.filter(status='Admission Confirmed').count()
+    rejected = inquiries.filter(status='Rejected').count()
+        
     # Today's Counts
     today = now().date()
-    inquiries_today = Lead.objects.filter(status='Inquiry', inquiry_date=today).count()
-    registrations_today = Lead.objects.filter(status='Registration', registration_date=today).count()
-    tests_today = Lead.objects.filter(status='Admission Test', admission_test_date=today).count()
-    admissions_offered_today = Lead.objects.filter(status='Admission Offered', admission_confirmed_date=today).count()
-    admissions_confirmed_today = Lead.objects.filter(status='Admission Confirmed', admission_confirmed_date=today).count()
-    rejected_today = Lead.objects.filter(status='Rejected', admission_confirmed_date=today).count()
+    inquiries_today = inquiries.filter(status='Inquiry', inquiry_date=today).count()
+    registrations_today = inquiries.filter(status='Registration', registration_date=today).count()
+    tests_today = inquiries.filter(status='Admission Test', admission_test_date=today).count()
+    admissions_offered_today = inquiries.filter(status='Admission Offered', admission_confirmed_date=today).count()
+    admissions_confirmed_today = inquiries.filter(status='Admission Confirmed', admission_confirmed_date=today).count()
+    rejected_today = inquiries.filter(status='Rejected', admission_confirmed_date=today).count()
 
     # Counts by Student Class
-    inquiries_by_class = Lead.objects.values('student_class').annotate(total=Count('id')).order_by('-total')
+    inquiries_by_class = inquiries.values('student_class').annotate(total=Count('id')).order_by('-total')
 
     # Counts by Inquiry Source
-    inquiries_by_source = Lead.objects.values('inquiry_source').annotate(total=Count('id')).order_by('-total')
+    inquiries_by_source = inquiries.values('inquiry_source').annotate(total=Count('id')).order_by('-total')
 
     # Counts by Location (City)
-    inquiries_by_location = Lead.objects.values('location_tag__name').annotate(total=Count('id')).order_by('-total')
+    inquiries_by_location = inquiries.values('location_tag__name').annotate(total=Count('id')).order_by('-total')
 
     # Inquiry Trends (Last 7 Days)
-    recent_trends = Lead.objects.filter(inquiry_date__gte=today - timedelta(days=7)).annotate(
+    recent_trends = inquiries.filter(inquiry_date__gte=today - timedelta(days=7)).annotate(
         day=TruncDate('inquiry_date')
     ).values('day').annotate(total=Count('id')).order_by('day')
 
     # Most Recent Inquiries (Last 5)
-    recent_inquiries = Lead.objects.all().order_by('-inquiry_date')[:5]
+    recent_inquiries = inquiries.order_by('-inquiry_date')[:5]
 
     context = {
         # Overall Stats
@@ -237,8 +293,13 @@ def dashboard(request):
 
 @login_required
 def agent_performance(request):
-    # Get all agents
-    agents = Agent.objects.all()
+    user = request.user  # Get the logged-in user
+
+    # If the user is an admin, get all agents; otherwise, get only the logged-in agent
+    if user.is_staff:
+        agents = Agent.objects.all()  # Admins see all agents
+    else:
+        agents = Agent.objects.filter(user=user)  # Agents see only their own data
 
     # Initialize list to store agent performance data
     agent_data = []
@@ -260,29 +321,23 @@ def agent_performance(request):
         leads_rejected = Lead.objects.filter(assigned_agent=agent, status='Rejected').count()
 
         # Conversion Rates (Admission Offered and Confirmed)
-        if total_leads > 0:
-            conversion_rate = (leads_to_admission_offered + leads_to_admission_confirmed) / total_leads * 100
-        else:
-            conversion_rate = 0
+        conversion_rate = (leads_to_admission_offered + leads_to_admission_confirmed) / total_leads * 100 if total_leads > 0 else 0
 
         # Follow-Up Efficiency (leads with follow-up date set)
         leads_with_follow_up = Lead.objects.filter(assigned_agent=agent, follow_up_date__isnull=False).count()
         follow_up_efficiency = (leads_with_follow_up / total_leads * 100) if total_leads > 0 else 0
 
         # Average Time to Conversion (from Inquiry to Admission Confirmed)
-        total_days_to_conversion = 0
-        conversions = Lead.objects.filter(assigned_agent=agent, status='Admission Confirmed')
-        for lead in conversions:
-            if lead.inquiry_date and lead.admission_confirmed_date:
-                total_days_to_conversion += (lead.admission_confirmed_date - lead.inquiry_date).days
-
-        average_days_to_conversion = total_days_to_conversion / len(conversions) if conversions else 0
+        total_days_to_conversion = sum(
+            (lead.admission_confirmed_date - lead.inquiry_date).days
+            for lead in Lead.objects.filter(assigned_agent=agent, status='Admission Confirmed')
+            if lead.inquiry_date and lead.admission_confirmed_date
+        )
+        conversions_count = Lead.objects.filter(assigned_agent=agent, status='Admission Confirmed').count()
+        average_days_to_conversion = total_days_to_conversion / conversions_count if conversions_count else 0
 
         # Leads Remaining in Pending Status (still in Inquiry or Follow-up)
-        leads_in_pending = Lead.objects.filter(
-            assigned_agent=agent, 
-            status__in=['Inquiry', 'Follow-up']
-        ).count()
+        leads_in_pending = Lead.objects.filter(assigned_agent=agent, status__in=['Inquiry', 'Follow-up']).count()
 
         # Collect data for each agent
         agent_data.append({
@@ -307,13 +362,22 @@ def agent_performance(request):
 
 
 
+@login_required
 def export_inquiries_excel(request):
+    user = request.user  # Get the logged-in user
+
+    # If the user is an admin, get all inquiries; otherwise, get only the logged-in agent's inquiries
+    if user.is_staff:
+        inquiries = Lead.objects.all()
+    else:
+        inquiries = Lead.objects.filter(assigned_agent__user=user)  # Filter only assigned inquiries for the agent
+
     # Create a workbook and select the active worksheet
     workbook = Workbook()
     worksheet = workbook.active
     worksheet.title = "Inquiries"
 
-    # Add the header row (make sure to include all the necessary fields from your model)
+    # Add the header row
     headers = [
         'Student Name', 'Parent Name', 'Mobile Number', 'Email', 'Address',
         'Location', 'Inquiry Source', 'Student Class', 'Status',
@@ -324,7 +388,7 @@ def export_inquiries_excel(request):
     worksheet.append(headers)
 
     # Add inquiry data to the worksheet
-    for inquiry in Lead.objects.all():
+    for inquiry in inquiries:
         worksheet.append([
             inquiry.student_name,
             inquiry.parent_name,
@@ -355,7 +419,9 @@ def export_inquiries_excel(request):
     return response
 
 
+
 @login_required
+@user_passes_test(is_admin)
 def assign_lead(request):
     inquiries = Lead.objects.filter(assigned_agent__isnull=True)  # Fetch unassigned inquiries
     agents = Agent.objects.all()  # Fetch all agents
@@ -402,6 +468,7 @@ def assign_lead(request):
     
     
 @login_required
+@user_passes_test(is_admin)
 def delete_inquiry(request, id):
     # Get the inquiry by ID
     inquiry = get_object_or_404(Lead, id=id)
@@ -416,13 +483,53 @@ def delete_inquiry(request, id):
     return redirect('inquiry_list')
     
 
+# Helper function to send the email with the default password
+def send_agent_welcome_email(agent, default_password):
+    subject = "Welcome to the Team!"
+    message = f"Hello {agent.name},\n\n" \
+              f"Your agent account has been created successfully.\n\n" \
+              f"Here are your login credentials:\n" \
+              f"Email: {agent.email}\n" \
+              f"Password: {default_password}\n\n" \
+              f"Please login and change your password after the first login.\n\n" \
+              f"Best regards,\nThe Team"
+    
+    send_mail(
+        subject=subject,
+        message=message,
+        from_email=settings.DEFAULT_FROM_EMAIL,  # Default email set in settings.py
+        recipient_list=[agent.email],
+        fail_silently=False,
+    )
+
+
+# View to add agent
 @login_required
+@user_passes_test(is_admin)  # Make sure only admin can access this
 def add_agent(request):
     if request.method == 'POST':
         form = AgentForm(request.POST)
         if form.is_valid():
-            form.save()
-            messages.success(request, "Agent added successfully!")
+            # Get the form data
+            agent_name = form.cleaned_data['name']
+            email = form.cleaned_data['email']
+            performance_score = form.cleaned_data['performance_score']
+            
+            # Create the User for the agent with a default password
+            default_password = 'DefaultPassword123!'  # Set a default password
+            
+            user = User.objects.create_user(username=email, email=email, password=default_password)
+
+            # Create the agent object and associate with the user
+            agent = form.save(commit=False)  # Don't save yet; we need to associate it with the user
+            agent.user = user  # Associate the user
+            agent.save()
+
+            # Send the email with the default password
+            send_agent_welcome_email(agent, default_password)
+
+            # Show success message
+            messages.success(request, f"Agent '{agent.name}' added successfully! The default password has been sent to their email.")
             return redirect('add_agent')  # Redirect to the same page after success
         else:
             messages.error(request, "Error adding agent. Please correct the errors below.")
@@ -434,6 +541,7 @@ def add_agent(request):
 
 
 @login_required
+@user_passes_test(is_admin)
 def agent_list(request):
     # Get filter query parameters
     name_filter = request.GET.get('name', '')

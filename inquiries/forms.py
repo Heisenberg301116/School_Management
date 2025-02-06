@@ -5,8 +5,6 @@ from datetime import date
 
 
 class InquiryForm(forms.ModelForm):
-    assigned_agent = forms.ModelChoiceField(queryset=Agent.objects.all(), required=True)
-    
     class Meta:
         model = Lead
         fields = ['student_name','parent_name','mobile_number','email','address','location_tag','inquiry_source','student_class','status','remarks','inquiry_date','follow_up_date','registration_date','admission_test_date','admission_offered_date','admission_confirmed_date','rejected_date','assigned_agent','admin_assigned']

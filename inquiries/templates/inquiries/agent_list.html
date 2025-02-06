@@ -7,6 +7,190 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agent List</title>
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <style>
+        /* General styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .filter-form,
+        .agent-table {
+            margin: 20px 0;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-form h3 {
+            margin-bottom: 20px;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 15px;
+            font-size: 14px;
+            border-radius: 4px;
+            text-align: center;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #45a049;
+        }
+
+        .btn-secondary {
+            background-color: #007BFF;
+            color: white;
+            margin-left: 10px;
+        }
+
+        .btn-secondary:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+
+        .agent-table table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .agent-table th,
+        .agent-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .agent-table th {
+            background-color: #f4f4f4;
+        }
+
+        .navigation {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .navigation a {
+            font-size: 14px;
+            color: #007BFF;
+            text-decoration: none;
+        }
+
+        .navigation a:hover {
+            text-decoration: underline;
+        }
+
+        @media screen and (max-width: 768px) {
+            .filter-form,
+            .agent-table {
+                padding: 15px;
+            }
+
+            .form-group input {
+                font-size: 12px;
+            }
+
+            .btn {
+                font-size: 12px;
+                padding: 8px 12px;
+            }
+
+            .agent-table th, .agent-table td {
+                padding: 8px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .filter-form {
+                padding: 10px;
+            }
+
+            .form-group input {
+                font-size: 10px;
+            }
+
+            .btn {
+                font-size: 10px;
+                padding: 6px 10px;
+            }
+
+            .agent-table th, .agent-table td {
+                padding: 6px;
+            }
+
+            h1 {
+                font-size: 20px;
+            }
+        }
+
+        a.btn {
+            text-decoration: none; /* Remove the underline */
+            color: white; /* Set text color to match button */
+            display: inline-block; /* Ensure it's displayed as a block element like a button */
+            padding: 10px 15px; /* Add padding like a button */
+            background-color: #4CAF50; /* Use the same background color as the button */
+            border-radius: 4px; /* Match the button's border radius */
+            font-size: 14px;
+            text-align: center;
+        }
+        
+        a.btn:hover {
+            background-color: #45a049; /* Change the background color on hover */
+        }
+    </style>
 </head>
 
 <body>
@@ -36,40 +220,44 @@
     </form>
 
     <!-- Agent List Table -->
-    <table border="1">
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Performance Score</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for agent in agents %}
-            <tr>
-                <td>{{ forloop.counter }}</td>
-                <td>{{ agent.name }}</td>
-                <td>{{ agent.email }}</td>
-                <td>{{ agent.performance_score }}</td>
-                <td>
-                    <form method="POST" style="display: inline;">
-                        {% csrf_token %}
-                        <input type="hidden" name="agent_id" value="{{ agent.id }}">
-                        <button type="submit" class="btn btn-danger">Delete</button>
-                    </form>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="5">No agents found matching your criteria.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="agent-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Performance Score</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for agent in agents %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ agent.name }}</td>
+                    <td>{{ agent.email }}</td>
+                    <td>{{ agent.performance_score }}</td>
+                    <td>
+                        <form method="POST" style="display: inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="agent_id" value="{{ agent.id }}">
+                            <button type="submit" class="btn btn-danger">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5">No agents found matching your criteria.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
-    <a href="{% url 'add_agent' %}" class="btn btn-primary">Add New Agent</a>
+    <div class="navigation">
+        <a href="{% url 'add_agent' %}" class="btn btn-primary">Add New Agent</a>
+    </div>
 </body>
 
 </html>

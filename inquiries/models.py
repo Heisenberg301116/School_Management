@@ -2,7 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from cities_light.models import City
     
-class Agent(models.Model):   
+class Agent(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     email = models.EmailField(max_length=100, unique=True)
     performance_score = models.IntegerField(default=100)
