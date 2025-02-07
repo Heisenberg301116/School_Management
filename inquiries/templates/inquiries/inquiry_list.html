@@ -11,255 +11,352 @@
     <!-- External CSS -->
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 
-    <!-- jQuery (for Sorting) -->
+    <!-- jQuery (for Sorting and Select2) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <!-- Font Awesome (for icons) -->
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 
     <style>
-        /* General Styling */
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f4f7fc;
-            color: #333;
-            text-align: center;
-        }
+      /* General Styling */
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f4f7fc;
+    color: #333;
+    text-align: center;
+}
 
-        h1 {
-            font-size: 32px;
-            margin-bottom: 20px;
-        }
+h1 {
+    font-size: 32px;
+    margin-bottom: 20px;
+    color: #333;
+}
 
-        /* Form Styling */
-        form {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: flex-start;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
+/* Modal Styling */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5); /* Black with opacity */
+    padding-top: 60px;
+    font-family: 'Arial', sans-serif;
+    text-align: center;
+}
 
-        input,
-        select,
-        button,
-        .filter-checkbox {
-            padding: 8px;
-            font-size: 14px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            margin: 5px;
-        }
+.modal-content {
+    background-color: #fff;
+    margin: 5% auto;
+    padding: 30px;
+    border: 1px solid #ccc;
+    width: 70%; /* Restrict width to make it more compact */
+    max-width: 900px; /* Max width to prevent stretching too much */
+    border-radius: 8px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
 
-        button {
-            background-color: #007bff;
-            color: white;
-            cursor: pointer;
-        }
+/* Close Button */
+.close {
+    color: #aaa;
+    font-size: 32px;
+    font-weight: bold;
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    cursor: pointer;
+}
 
-        button:hover {
-            background-color: #0056b3;
-        }
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
 
-        /* Table Styling */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-            margin-top: 20px;
-        }
+/* Title Styling */
+h2 {
+    text-align: center;
+    font-size: 26px;
+    margin-bottom: 20px;
+    color: #333;
+}
 
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border: 1px solid #ddd;
-        }
+/* Form Layout (Grid) */
+form {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 2fr)); /* Adjust width to make form compact */
+    gap: 15px;
+    justify-items: stretch;
+}
 
-        th {
-            background-color: #007bff;
-            color: white;
-            cursor: pointer;
-            position: relative;
-            text-align: center;
-        }
+label {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 5px;
+    display: block;
+}
 
-        th i {
-            margin-left: 5px;
-            font-size: 12px;
-        }
+/* Input, Select and Date Input Styling */
+input[type="text"],
+select,
+input[type="date"] {
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    width: 100%;
+    box-sizing: border-box;
+}
 
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
+input[type="text"]:focus,
+select:focus,
+input[type="date"]:focus {
+    border-color: #4CAF50;
+    outline: none;
+}
 
-        .delete-link {
-            color: red;
-        }
+/* Button Styles */
+button[type="submit"] {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 14px 20px;
+    font-size: 18px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
 
-        /* Sorting Buttons */
-        .sort-btn {
-            cursor: pointer;
-            font-size: 12px;
-            padding: 0 5px;
-            background-color: transparent;
-            border: none;
-            color: white;
-        }
+button[type="submit"]:hover {
+    background-color: #0056b3;
+}
 
-        .asc::after {
-            content: " ↑";
-        }
+/* Reset Link Styles */
+a {
+    display: inline-block;
+    text-align: center;
+    background-color: #f44336;
+    color: white;
+    text-decoration: none;
+    padding: 14px 20px;
+    font-size: 16px;
+    border-radius: 5px;
 
-        .desc::after {
-            content: " ↓";
-        }
+    transition: background-color 0.3s;
+    margin-top: 10px;
+}
 
-        .none::after {
-            content: " ↕️";
-        }
+a:hover {
+    background-color: #d32f2f;
+}
 
-        .hidden-column {
-            display: none;
-        }
 
-        .sort-btn.none {
-            background-color: transparent; /* No background color */
-            color: transparent; /* No arrow visible */
-            border: none; /* No border */
-            padding: 0; /* No padding */
-            font-size: 0px; /* Adjust size for the arrow */
-            cursor: pointer;
-        }
-        
-        .sort-btn.asc, .sort-btn.desc {
-            color: white; /* Make the arrow white */
-            font-weight: 900; /* Bold the arrow */
-            font-size: 18px; /* Increase font size for better visibility */
-        }
-        
-      
-        
-    
+/* Further Adjustment for Extra Small Screens (Mobile Portrait Mode) */
+@media screen and (max-width: 480px) {
+    h1 {
+        font-size: 28px; /* Smaller heading */
+    }
 
-        /* Responsive */
-        @media screen and (max-width: 768px) {
-            form {
-                flex-direction: column;
-                align-items: center;
-            }
+    .close {
+        font-size: 28px; /* Smaller close button */
+    }
 
-            table {
-                display: block;
-                overflow-x: auto;
-            }
+    button[type="submit"],
+    a {
+        padding: 10px 15px; /* Slightly smaller button padding */
+    }
 
-            th, td {
-                white-space: nowrap;
-            }
-        }
+    label,
+    input[type="text"],
+    select,
+    input[type="date"] {
+        font-size: 14px; /* Smaller text input for compact layout */
+    }
+}
+
+/* Apply No-Style to Reset Link if Specified */
+a.no-style {
+    all: unset; /* Resets all styles */
+    color: red;
+    cursor: pointer;
+}
+
+/* Custom Styles for Navigation (if any) */
+.navigation {
+    margin-top: 30px;
+    text-align: center;
+    width: 12rem;
+    margin: auto;
+}
+
+.date-wrapper{
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+
+/* General Styling for Checkboxes in Manage Modal */
+.checkbox-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Grid format for checkboxes */
+    gap: 10px; /* Space between checkboxes */
+    align-items: center; /* Center the checkboxes vertically */
+    margin-top: 10px;
+}
+
+.checkbox-group label {
+    font-size: 16px;
+    color: #333;
+    margin-right: 10px;
+}
+
+/* Checkbox input styling */
+.checkbox-group input[type="checkbox"] {
+    margin-right: 5px; /* Space between checkbox and label */
+    transform: scale(1.2); /* Make checkboxes slightly larger */
+}
+
+
+
     </style>
 </head>
 
 <body>
     <h1>Inquiry List</h1>
 
-    <!-- Filter Form -->
-    <form method="get">
-        <input type="text" name="student_name" placeholder="Student Name" value="{{ request.GET.student_name }}">
-        <input type="text" name="mobile_number" placeholder="Mobile Number" value="{{ request.GET.mobile_number }}">
-        
-        <select name="student_class" class="searchable-select">
-            <option value="">All Classes</option>
-            {% for class in student_classes %}
-            <option value="{{ class }}" {% if request.GET.student_class == class %}selected{% endif %}>{{ class }}</option>
-            {% endfor %}
-        </select>
-        
+    <!-- Buttons to open modals -->
+    <button onclick="openModal('filterModal')">Open Filters</button>
+    <button onclick="openModal('columnsModal')">Manage Columns</button>
 
-        <select name="inquiry_source" class="searchable-select">
-            <option value="">All Sources</option>
-            {% for inquiry_source in inquiry_sources %}
-            <option value="{{ inquiry_source }}" {% if request.GET.inquiry_source == inquiry_source %}selected{% endif %}>{{ inquiry_source }}</option>
-            {% endfor %}
-        </select>
-        
-        
-        <select name="status" class="searchable-select">
-            <option value="">All Statuses</option>
-            {% for status in statuses %}
-            <option value="{{ status }}" {% if request.GET.status == status %}selected{% endif %}>{{ status }}</option>
-            {% endfor %}
-        </select>
-        
-        <select name="agent" class="searchable-select">
-            <option value="">All Agents</option>
-            {% for agent in agents %}
-            <option value="{{ agent.id }}" {% if request.GET.agent == agent.id|stringformat:"s" %}selected{% endif %}>{{ agent.name }}</option>
-            {% endfor %}
-        </select>
-        
-        <input type="text" name="agent_email" placeholder="Agent Email" value="{{ request.GET.agent_email }}">
-        <input type="text" name="location_tag" placeholder="Location Tag" value="{{ request.GET.location_tag }}">
-        <input type="text" name="admin_name" placeholder="Admin Name" value="{{ request.GET.admin_name }}">
-        <input type="text" name="admin_email" placeholder="Admin Email" value="{{ request.GET.admin_email }}">
+    <!-- Filters Modal -->
+    <div id="filterModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('filterModal')">&times;</span>
+            <h2>Filter Inquiries</h2>
+            <form method="get">
+                <!-- Existing Filters -->
+                <input type="text" name="student_name" placeholder="Student Name" value="{{ request.GET.student_name }}">
+                <input type="text" name="mobile_number" placeholder="Mobile Number" value="{{ request.GET.mobile_number }}">
+                
+                <select name="student_class" class="searchable-select" data-placeholder="Select the Class">
+                    <option value="">All Classes</option>
+                    {% for class in student_classes %}
+                    <option value="{{ class }}" {% if request.GET.student_class == class %}selected{% endif %}>{{ class }}</option>
+                    {% endfor %}
+                </select>
+                
+                <select name="inquiry_source" class="searchable-select" data-placeholder="Select the Inquiry Source">
+                    <option value="">All Sources</option>
+                    {% for inquiry_source in inquiry_sources %}
+                    <option value="{{ inquiry_source }}" {% if request.GET.inquiry_source == inquiry_source %}selected{% endif %}>{{ inquiry_source }}</option>
+                    {% endfor %}
+                </select>
+                
+                <!-- New Filters -->
+                <select name="status" class="searchable-select" data-placeholder="Select the Inquiry Status">
+                    <option value="">All Statuses</option>
+                    {% for status in statuses %}
+                    <option value="{{ status }}" {% if request.GET.status == status %}selected{% endif %}>{{ status }}</option>
+                    {% endfor %}
+                </select>
+                
+                <select name="agent" class="searchable-select" data-placeholder="Select the Agent">
+                    <option value="">All Agents</option>
+                    {% for agent in agents %}
+                    <option value="{{ agent.id }}" {% if request.GET.agent == agent.id|stringformat:"s" %}selected{% endif %}>{{ agent.name }}</option>
+                    {% endfor %}
+                </select>
+                             
+
+                <input type="text" name="agent_email" placeholder="Agent Email" value="{{ request.GET.agent_email }}">
+                <input type="text" name="location_tag" placeholder="Location Tag" value="{{ request.GET.location_tag }}">
+                <input type="text" name="admin_name" placeholder="Admin Name" value="{{ request.GET.admin_name }}">
+                <input type="text" name="admin_email" placeholder="Admin Email" value="{{ request.GET.admin_email }}">
+                
+                <!-- Date Filters -->
+                <div class="date-wrapper">
+                    <label>Follow-up Date:</label>
+                    <input type="date" name="follow_up_date" value="{{ request.GET.follow_up_date }}">
+                </div>
     
-        <label>Inquiry Date:</label>
-        <input type="date" name="inquiry_date" value="{{ request.GET.inquiry_date }}">
-        
-        <label>Registration Date:</label>
-        <input type="date" name="registration_date" value="{{ request.GET.registration_date }}">
-        
-        <label>Admission Test Date:</label>
-        <input type="date" name="admission_test_date" value="{{ request.GET.admission_test_date }}">
-        
-        <label>Admission Offered Date:</label>
-        <input type="date" name="admission_offered_date" value="{{ request.GET.admission_offered_date }}">
-        
-        <label>Admission Confirmed Date:</label>
-        <input type="date" name="admission_confirmed_date" value="{{ request.GET.admission_confirmed_date }}">
-        
-        <button type="submit">Filter</button>
-        <a href="{% url 'inquiry_list' %}">Reset</a>
-    </form>
+                <div class="date-wrapper">
+                    <label>Inquiry Date:</label>
+                    <input type="date" name="inquiry_date" value="{{ request.GET.inquiry_date }}">
+                </div>
+                
+                <div class="date-wrapper">
+                    <label>Registration Date:</label>
+                    <input type="date" name="registration_date" value="{{ request.GET.registration_date }}">
+                </div>
+
+                <div class="date-wrapper">
+                    <label>Admission Test Date:</label>
+                    <input type="date" name="admission_test_date" value="{{ request.GET.admission_test_date }}">
+                </div>
+
+                <div class="date-wrapper">
+                    <label>Admission Offered Date:</label>
+                    <input type="date" name="admission_offered_date" value="{{ request.GET.admission_offered_date }}">
+                </div>
+                
+                <div class="date-wrapper">
+                    <label>Admission Confirmed Date:</label>
+                    <input type="date" name="admission_confirmed_date" value="{{ request.GET.admission_confirmed_date }}">
+                </div>
+                <!-- Submit and Reset -->
+                <button type="submit">Filter</button>
+                <a href="{% url 'inquiry_list' %}">Reset</a>
+            </form>
+        </div>
+    </div>
+    
     
 
-    <a href="{% url 'add_inquiry' %}">➕ Add New Inquiry</a>
-
-    <!-- Column Visibility Filters -->   
-    <div>
-        <h3>Show/Hide Columns:</h3>
-        <label><input type="checkbox" class="filter-checkbox" data-column="0" checked> Student Name</label>
-        <label><input type="checkbox" class="filter-checkbox" data-column="1" checked> Lead Email</label>
-        <label><input type="checkbox" class="filter-checkbox" data-column="2" checked> Parent Name</label>
-        <label><input type="checkbox" class="filter-checkbox" data-column="3" checked> Mobile Number</label>
-        <label><input type="checkbox" class="filter-checkbox" data-column="4" checked> Address</label>
-        <label><input type="checkbox" class="filter-checkbox" data-column="5" checked> Inquiry Source</label>
-        <label><input type="checkbox" class="filter-checkbox" data-column="6" checked> Student Class</label>
-        <label><input type="checkbox" class="filter-checkbox" data-column="7" checked> Follow-up Date</label>
-        <label><input type="checkbox" class="filter-checkbox" data-column="8" checked> Status</label>
-        <label><input type="checkbox" class="filter-checkbox" data-column="9" checked> Agent</label>
-        <label><input type="checkbox" class="filter-checkbox" data-column="10" checked> Agent Email</label>
-        <label><input type="checkbox" class="filter-checkbox" data-column="11" checked> Location Tag</label>
-        <label><input type="checkbox" class="filter-checkbox" data-column="12" checked> Admin Assigned</label>
-        <label><input type="checkbox" class="filter-checkbox" data-column="13" checked> Admin Email</label>
-        <label><input type="checkbox" class="filter-checkbox" data-column="14" checked> Actions</label>
-        <label><input type="checkbox" class="filter-checkbox" data-column="15" checked> Delete</label>
+    <!-- Columns Modal -->
+    <div id="columnsModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('columnsModal')">&times;</span>
+            <h2>Manage Columns</h2>
+            <div class="checkbox-group">
+                <label><input type="checkbox" class="filter-checkbox" data-column="0" checked> Student Name</label>
+                <label><input type="checkbox" class="filter-checkbox" data-column="1" checked> Lead Email</label>
+                <label><input type="checkbox" class="filter-checkbox" data-column="2" checked> Parent Name</label>
+                <label><input type="checkbox" class="filter-checkbox" data-column="3" checked> Mobile Number</label>
+                <label><input type="checkbox" class="filter-checkbox" data-column="4" checked> Address</label>
+                <label><input type="checkbox" class="filter-checkbox" data-column="5" checked> Inquiry Source</label>
+                <label><input type="checkbox" class="filter-checkbox" data-column="6" checked> Student Class</label>
+                <label><input type="checkbox" class="filter-checkbox" data-column="7" checked> Follow-up Date</label>
+                <label><input type="checkbox" class="filter-checkbox" data-column="8" checked> Status</label>
+                <label><input type="checkbox" class="filter-checkbox" data-column="9" checked> Agent</label>
+                <label><input type="checkbox" class="filter-checkbox" data-column="10" checked> Agent Email</label>
+                <label><input type="checkbox" class="filter-checkbox" data-column="11" checked> Location Tag</label>
+                <label><input type="checkbox" class="filter-checkbox" data-column="12" checked> Admin Assigned</label>
+                <label><input type="checkbox" class="filter-checkbox" data-column="13" checked> Admin Email</label>
+                <label><input type="checkbox" class="filter-checkbox" data-column="14" checked> Actions</label>
+                <label><input type="checkbox" class="filter-checkbox" data-column="15" checked> Delete</label>
+            </div>
+            <button id="SelectAllButton">Check All</button>
+            <button id="UnSelectAllButton">Uncheck All</button>
+        </div>
     </div>
 
-    <!-- Export to excel -->
-    <a href="{% url 'export_inquiries_csv' %}">📥 Export to CSV</a>
-    <br>
-
-    <!-- Inquiry Table -->
+    <a href="{% url 'add_inquiry' %}">Add New Inquiry</a>
+    
     <table id="inquiryTable">
         <thead>
             <tr>
-                <th onclick="sortColumn(0)">Student Name <button class="sort-btn none" data-column="0" ></button></th>
+                <th onclick="sortColumn(0)">Student Name <button class="sort-btn none" data-column="0"></button></th>
                 <th onclick="sortColumn(1)">Lead Email <button class="sort-btn none" data-column="1"></button></th>
                 <th onclick="sortColumn(2)">Parent Name <button class="sort-btn none" data-column="2"></button></th>
                 <th onclick="sortColumn(3)">Mobile Number <button class="sort-btn none" data-column="3"></button></th>
@@ -295,10 +392,10 @@
                 <td>{{ inquiry.admin_assigned.username|default:"Not Assigned" }}</td>
                 <td>{{ inquiry.admin_assigned.email|default:"NULL" }}</td>
                 <td>
-                    <a href="{% url 'update_status' inquiry.id %}">Manage</a>
+                    <a class="no-style" href="{% url 'update_status' inquiry.id %}">Manage</a>
                 </td>
                 <td>
-                    <a href="{% url 'delete_inquiry' inquiry.id %}" class="delete-link" onclick="return confirm('Are you sure you want to delete this inquiry?')">Delete</a>
+                    <a class="no-style" href="{% url 'delete_inquiry' inquiry.id %}" class="delete-link" onclick="return confirm('Are you sure you want to delete this inquiry?')">Delete</a>
                 </td>
             </tr>
             {% empty %}
@@ -308,45 +405,31 @@
             {% endfor %}
         </tbody>
     </table>
+
+
+    <!-- Navigation Link -->
+    <div class="navigation">
+        <a href="{% url 'dashboard' %}" class="btn-back">Back to Dashboard</a>
+    </div>
+
     
-    <a href="{% url 'dashboard' %}">Back to Dashboard</a>
 
+    <!-- Modal Scripts -->
     <script>
-        // Sorting function for columns
-        function sortColumn(columnIndex) {
-            var table = document.getElementById("inquiryTable");
-            var rows = Array.from(table.rows).slice(1);
-            var sortOrder = table.dataset.sortOrder === "asc" ? "desc" : "asc";
-
-            rows.sort(function (rowA, rowB) {
-                var cellA = rowA.cells[columnIndex].textContent.trim().toLowerCase();
-                var cellB = rowB.cells[columnIndex].textContent.trim().toLowerCase();
-
-                if (!isNaN(cellA) && !isNaN(cellB)) {
-                    return sortOrder === "asc" ? cellA - cellB : cellB - cellA;
-                }
-                return sortOrder === "asc" ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
-            });
-
-            table.tBodies[0].append(...rows);
-            table.dataset.sortOrder = sortOrder;
-
-            // Update sort button icons
-            updateSortButtons(columnIndex, sortOrder);
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = "block";
         }
 
-        // Update sorting buttons based on column and order
-        function updateSortButtons(columnIndex, sortOrder) {
-            var buttons = document.querySelectorAll('.sort-btn');
-            buttons.forEach(function(button) {
-                button.classList.remove('asc', 'desc', 'none');
-                button.classList.add('none');
-            });
-
-            var activeButton = buttons[columnIndex];
-            activeButton.classList.remove('none');
-            activeButton.classList.add(sortOrder);
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = "none";
         }
+
+        // Close modal when user clicks outside of it
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = "none";
+            }
+        };
 
         // Column Visibility Toggle
         $('.filter-checkbox').change(function() {
@@ -355,18 +438,77 @@
             $('#inquiryTable th:nth-child(' + (columnIndex + 1) + ')').toggleClass('hidden-column', !isVisible);
             $('#inquiryTable td:nth-child(' + (columnIndex + 1) + ')').toggleClass('hidden-column', !isVisible);
         });
+
+       // Apply Select2 to all searchable select elements with custom placeholders
+$(document).ready(function() {
+    $('.searchable-select').each(function() {
+        var placeholderText = $(this).data('placeholder');
+        $(this).select2({
+            placeholder: placeholderText,
+            allowClear: true
+        });
+    });
+});
+
+        // Sorting function
+        function sortColumn(columnIndex) {
+            var table = document.getElementById("inquiryTable");
+            var rows = table.rows;
+            var switching = true;
+            var shouldSwitch, i, x, y, dir, switchcount = 0;
+            dir = "asc";
+
+            while (switching) {
+                switching = false;
+                for (i = 1; i < (rows.length - 1); i++) {
+                    shouldSwitch = false;
+                    x = rows[i].getElementsByTagName("TD")[columnIndex];
+                    y = rows[i + 1].getElementsByTagName("TD")[columnIndex];
+                    if (dir == "asc") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir === "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    switchcount++;
+                } else {
+                    if (switchcount === 0 && dir === "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
     </script>
 
     <script>
-        // Apply Select2 to all searchable select elements
-        $(document).ready(function() {
-            $('.searchable-select').select2({
-                placeholder: 'Select an option',
-                allowClear: true
+        document.getElementById("SelectAllButton").addEventListener("click", function() {
+            const checkboxes = document.querySelectorAll('.filter-checkbox');
+            checkboxes.forEach(function(checkbox) {
+                checkbox.checked = true;
             });
         });
+        
     </script>
 
+    <script>
+        document.getElementById("UnSelectAllButton").addEventListener("click", function() {
+            const checkboxes = document.querySelectorAll('.filter-checkbox');
+            checkboxes.forEach(function(checkbox) {
+                checkbox.checked = false;
+            });
+        });
+        
+    </script>
+    
 </body>
-
 </html>

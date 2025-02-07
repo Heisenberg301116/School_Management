@@ -112,6 +112,10 @@ def inquiry_list(request):
     admin_email = request.GET.get('admin_email')
     if admin_email:
         inquiries = inquiries.filter(admin_assigned__email__icontains=admin_email)
+        
+    follow_up_date = request.GET.get('follow_up_date')
+    if follow_up_date:
+        inquiries = inquiries.filter(follow_up_date=follow_up_date)
 
     inquiry_date = request.GET.get('inquiry_date')
     if inquiry_date:
@@ -174,7 +178,7 @@ def add_inquiry(request):
                 send_mail(
                     subject='New Inquiry Arrived',
                     message=f'A new inquiry has arrived.\n\nDetails:\n{inquiry}',
-                    from_email='sushant889427@gmail.com',  # Sender email
+                    from_email='uncertain30@gmail.com',  # Sender email
                     recipient_list=recipient_list,  # Recipient email(s)
                     fail_silently=False,
                 )                        
@@ -217,7 +221,7 @@ def manage_lead_status(request, inquiry_id):
             'admin_assigned': inquiry.admin_assigned,
         }, instance=inquiry)  # Ensure form is tied to the existing instance
 
-    return render(request, 'inquiries/next_follow_up.html', {'form': form, 'inquiry': inquiry})
+    return render(request, 'inquiries/update_status.html', {'form': form, 'inquiry': inquiry})
 
 
 

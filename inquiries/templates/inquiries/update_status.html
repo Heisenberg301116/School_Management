@@ -7,12 +7,12 @@
     <meta charset="UTF-8">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Next Follow-up</title>
+    <title>Update Status</title>
 </head>
 
 <body>
     <div class="container">
-        <h1>Next Follow-up for {{ inquiry.student_name }}</h1>
+        <h1>Update Status for {{ inquiry.student_name }}</h1>
 
         <!-- Display Follow-up Form -->
         <form method="POST" class="follow-up-form" id="followUpForm">
@@ -53,7 +53,7 @@
 
             <!-- Remarks Field -->
             <label for="id_remarks">Remarks:</label>
-            {{ form.remarks }}
+            {{ form.remarks }}            
 
             <!-- Assigned Agent Field -->
             <label for="id_assigned_agent">Assigned Agent:</label>
@@ -62,6 +62,11 @@
             <!-- Admin Assigned Field -->
             <label for="id_admin_assigned">Admin Assigned:</label>
             {{ form.admin_assigned }}
+
+            <div id="follow_up-date-field">
+                <label for="id_follow_up_date">Next Follow-up Date:</label>
+                <input type="date" id="id_follow_up_date" name="follow_up_date">
+            </div>
 
             <!-- Submit Button -->
             <button type="submit" class="btn-submit">Submit Follow-up</button>
