@@ -113,6 +113,11 @@
         tr:last-child td {
             border-bottom: none;
         }
+
+        .navigation {
+            margin-top: 30px;
+            text-align: center;
+        }
     </style>
 </head>
 
@@ -156,6 +161,11 @@
                     {% endfor %}
                 </tbody>
             </table>
+        </div>
+
+        <!-- Navigation Link -->
+        <div class="navigation">
+            <a href="{% url 'dashboard' %}" class="btn-back">Back to Dashboard</a>
         </div>
     </div>
 </body>

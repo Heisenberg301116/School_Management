@@ -162,6 +162,11 @@
             }
         }
 
+        .navigation {
+            margin-top: 30px;
+            text-align: center;
+        }
+
         @media screen and (max-width: 480px) {
             .form-container {
                 padding: 10px;
@@ -230,10 +235,11 @@
 
         <!-- Back Link -->
         <div class="center-btn">
-            <a href="{% url 'inquiry_list' %}" class="btn-secondary">Back to Inquiry List</a>
+            <a href="{% url 'dashboard' %}" class="btn-secondary">Back to Dashboard</a>
         </div>
         
     </div>
+    
 
     <script>
         // Initialize Select2 for dropdowns
@@ -275,6 +281,8 @@
             });
         });
     </script>
+
+    
     
 
 </body>

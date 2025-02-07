@@ -55,58 +55,91 @@ def agent_login(request):
 
 
 
+from django.contrib.auth.decorators import login_required
+from django.db.models import Q
+from django.shortcuts import render
+from .models import Lead, Agent  # Import your models
+from django.contrib.auth.models import User
+from cities_light.models import City  # Assuming you're using cities_light for location tags
+
 @login_required
 def inquiry_list(request):
     user = request.user
-    if user.is_staff:  # Admins can see all inquiries
+
+    # Filter inquiries based on user type (staff or agent)
+    if user.is_staff:
         inquiries = Lead.objects.all()
-    else:  # Agents can only see inquiries where they are the assigned agent
-        # Ensure that the user is an agent and filter based on the assigned_agent
+    else:
         inquiries = Lead.objects.filter(assigned_agent__user=user)
-    
-    # Search and filtering logic
-    search_query = request.GET.get('q', '')
-    if search_query:
-        inquiries = inquiries.filter(
-            Q(student_name__icontains=search_query) |
-            Q(parent_name__icontains=search_query) |
-            Q(mobile_number__icontains=search_query) |
-            Q(email__icontains=search_query)
-        )
-    
-    # Add filters for student_class and admin_assigned
-    student_class_filter = request.GET.get('student_class', '')
-    if student_class_filter:
-        inquiries = inquiries.filter(student_class=student_class_filter)
 
-    admin_assigned_filter = request.GET.get('admin_assigned', '')
-    if admin_assigned_filter:
-        inquiries = inquiries.filter(admin_assigned_id=admin_assigned_filter)
+    # Handle filters from the GET request
+    student_name = request.GET.get('student_name')
+    if student_name:
+        inquiries = inquiries.filter(student_name__icontains=student_name)
 
-    # Other existing filters
-    status_filter = request.GET.get('status', '')
-    if status_filter:
-        inquiries = inquiries.filter(status=status_filter)
+    mobile_number = request.GET.get('mobile_number')
+    if mobile_number:
+        inquiries = inquiries.filter(mobile_number__icontains=mobile_number)
 
-    assigned_agent_filter = request.GET.get('agent', '')
-    if assigned_agent_filter:
-        inquiries = inquiries.filter(assigned_agent_id=assigned_agent_filter)
-    
-    location_filter = request.GET.get('location_tag', '')
-    if location_filter:
-        inquiries = inquiries.filter(location_tag__icontains=location_filter)
+    student_class = request.GET.get('student_class')
+    if student_class:
+        inquiries = inquiries.filter(student_class=student_class)
 
-    inquiry_source_filter = request.GET.get('inquiry_source', '')
-    if inquiry_source_filter:
-        inquiries = inquiries.filter(inquiry_source__icontains=inquiry_source_filter)
-        
-    # Populate options for filtering dropdowns
+    inquiry_source = request.GET.get('inquiry_source')
+    if inquiry_source:
+        inquiries = inquiries.filter(inquiry_source__icontains=inquiry_source)
+
+    status = request.GET.get('status')
+    if status:
+        inquiries = inquiries.filter(status=status)
+
+    agent = request.GET.get('agent')
+    if agent:
+        inquiries = inquiries.filter(assigned_agent_id=agent)
+
+    agent_email = request.GET.get('agent_email')
+    if agent_email:
+        inquiries = inquiries.filter(assigned_agent__email__icontains=agent_email)
+
+    location_tag = request.GET.get('location_tag')
+    if location_tag:
+        inquiries = inquiries.filter(location_tag__name__icontains=location_tag)
+
+    admin_name = request.GET.get('admin_name')
+    if admin_name:
+        inquiries = inquiries.filter(admin_assigned__username__icontains=admin_name)
+
+    admin_email = request.GET.get('admin_email')
+    if admin_email:
+        inquiries = inquiries.filter(admin_assigned__email__icontains=admin_email)
+
+    inquiry_date = request.GET.get('inquiry_date')
+    if inquiry_date:
+        inquiries = inquiries.filter(inquiry_date=inquiry_date)
+
+    registration_date = request.GET.get('registration_date')
+    if registration_date:
+        inquiries = inquiries.filter(registration_date=registration_date)
+
+    admission_test_date = request.GET.get('admission_test_date')
+    if admission_test_date:
+        inquiries = inquiries.filter(admission_test_date=admission_test_date)
+
+    admission_offered_date = request.GET.get('admission_offered_date')
+    if admission_offered_date:
+        inquiries = inquiries.filter(admission_offered_date=admission_offered_date)
+
+    admission_confirmed_date = request.GET.get('admission_confirmed_date')
+    if admission_confirmed_date:
+        inquiries = inquiries.filter(admission_confirmed_date=admission_confirmed_date)
+
+    # Populate options for dropdowns
     agents = Agent.objects.all()
     locations = City.objects.all()
     inquiry_sources = Lead.objects.values_list('inquiry_source', flat=True).distinct()
     statuses = Lead.objects.values_list('status', flat=True).distinct()
-    student_classes = Lead.objects.values_list('student_class', flat=True).distinct()  # Populate student_class options
-    admins = User.objects.filter(is_staff=True)  # Populate admin_assigned options (only staff users)
+    student_classes = Lead.objects.values_list('student_class', flat=True).distinct()
+    admins = User.objects.filter(is_staff=True)
 
     return render(request, 'inquiries/inquiry_list.html', {
         'inquiries': inquiries,
@@ -115,8 +148,9 @@ def inquiry_list(request):
         'inquiry_sources': inquiry_sources,
         'statuses': statuses,
         'student_classes': student_classes,
-        'admins': admins,  # Add admins to template context
+        'admins': admins,
     })
+
 
 
 

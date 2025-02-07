@@ -8,6 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Inquiry</title>
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    
 </head>
 
 <body>
@@ -57,12 +58,7 @@
             <div class="form-group">
                 <label for="{{ form.student_class.id_for_label }}">Student Class</label>
                 {{ form.student_class }}
-            </div>
-
-            <div class="form-group">
-                <label for="{{ form.status.id_for_label }}">Status</label>
-                {{ form.status }}
-            </div>
+            </div>           
 
             <div class="form-group">
                 <label for="{{ form.remarks.id_for_label }}">Remarks</label>
@@ -80,15 +76,21 @@
                 {{ form.admin_assigned }}
             </div>
 
-            <!-- Date Fields -->
+            <!-- Always Visible Follow-Up Date -->
+            <div class="form-group">
+                <label for="{{ form.follow_up_date.id_for_label }}">Follow-Up Date</label>
+                {{ form.follow_up_date }}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.status.id_for_label }}">Status</label>
+                {{ form.status }}
+            </div>
+
+            <!-- Conditional Date Fields -->
             <div id="inquiry-date" class="date-field" style="display: none;">
                 <label for="{{ form.inquiry_date.id_for_label }}">Inquiry Date</label>
                 {{ form.inquiry_date }}
-            </div>
-
-            <div id="follow-up-date" class="date-field" style="display: none;">
-                <label for="{{ form.follow_up_date.id_for_label }}">Follow-Up Date</label>
-                {{ form.follow_up_date }}
             </div>
 
             <div id="registration-date" class="date-field" style="display: none;">
@@ -122,7 +124,7 @@
 
         <!-- Navigation Link -->
         <div class="navigation">
-            <a href="{% url 'inquiry_list' %}" class="btn-back">Back to Inquiry List</a>
+            <a href="{% url 'dashboard' %}" class="btn-back">Back to Dashboard</a>
         </div>
     </div>
 
@@ -131,7 +133,6 @@
         const statusField = document.querySelector('select[name="status"]');
         const dateFields = {
             'Inquiry': document.getElementById('inquiry-date'),
-            'Follow Up': document.getElementById('follow-up-date'),
             'Registration': document.getElementById('registration-date'),
             'Admission Test': document.getElementById('admission-test-date'),
             'Admission Offered': document.getElementById('admission-offered-date'),
@@ -232,42 +233,6 @@
 
         .btn-back:hover {
             text-decoration: underline;
-        }
-
-        /* Responsive Design */
-        @media screen and (max-width: 768px) {
-            h1 {
-                font-size: 22px;
-                margin-bottom: 30px;
-            }
-
-            .container {
-                padding: 20px;
-            }
-
-            .form-group {
-                margin-bottom: 12px;
-            }
-
-            .btn-submit {
-                padding: 12px 20px;
-                font-size: 14px;
-            }
-        }
-
-        @media screen and (max-width: 480px) {
-            .container {
-                padding: 15px;
-            }
-
-            .btn-submit {
-                padding: 10px 18px;
-                font-size: 14px;
-            }
-
-            .btn-back {
-                font-size: 14px;
-            }
         }
     </style>
 

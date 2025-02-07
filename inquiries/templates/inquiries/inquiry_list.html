@@ -17,6 +17,9 @@
     <!-- Font Awesome (for icons) -->
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
     <style>
         /* General Styling */
         body {
@@ -37,18 +40,20 @@
         form {
             display: flex;
             flex-wrap: wrap;
-            justify-content: center;
+            justify-content: flex-start;
             gap: 10px;
             margin-bottom: 20px;
         }
 
         input,
         select,
-        button {
-            padding: 10px;
-            font-size: 16px;
+        button,
+        .filter-checkbox {
+            padding: 8px;
+            font-size: 14px;
             border-radius: 5px;
             border: 1px solid #ccc;
+            margin: 5px;
         }
 
         button {
@@ -80,6 +85,7 @@
             color: white;
             cursor: pointer;
             position: relative;
+            text-align: center;
         }
 
         th i {
@@ -91,20 +97,54 @@
             background-color: #f2f2f2;
         }
 
-        /* Links */
-        a {
-            text-decoration: none;
-            color: #007bff;
-            font-weight: bold;
-        }
-
-        a:hover {
-            text-decoration: underline;
-        }
-
         .delete-link {
             color: red;
         }
+
+        /* Sorting Buttons */
+        .sort-btn {
+            cursor: pointer;
+            font-size: 12px;
+            padding: 0 5px;
+            background-color: transparent;
+            border: none;
+            color: white;
+        }
+
+        .asc::after {
+            content: " ↑";
+        }
+
+        .desc::after {
+            content: " ↓";
+        }
+
+        .none::after {
+            content: " ↕️";
+        }
+
+        .hidden-column {
+            display: none;
+        }
+
+        .sort-btn.none {
+            background-color: transparent; /* No background color */
+            color: transparent; /* No arrow visible */
+            border: none; /* No border */
+            padding: 0; /* No padding */
+            font-size: 0px; /* Adjust size for the arrow */
+            cursor: pointer;
+        }
+        
+        .sort-btn.asc, .sort-btn.desc {
+            color: white; /* Make the arrow white */
+            font-weight: 900; /* Bold the arrow */
+            font-size: 18px; /* Increase font size for better visibility */
+        }
+        
+      
+        
+    
 
         /* Responsive */
         @media screen and (max-width: 768px) {
@@ -128,58 +168,111 @@
 <body>
     <h1>Inquiry List</h1>
 
-    <!-- Search and Filter Form -->
+    <!-- Filter Form -->
     <form method="get">
-        <input type="text" name="q" placeholder="Search inquiries..." value="{{ request.GET.q }}">
+        <input type="text" name="student_name" placeholder="Student Name" value="{{ request.GET.student_name }}">
+        <input type="text" name="mobile_number" placeholder="Mobile Number" value="{{ request.GET.mobile_number }}">
         
-        <select name="student_class">
+        <select name="student_class" class="searchable-select">
             <option value="">All Classes</option>
-            {% for student_class in student_classes %}
-            <option value="{{ student_class }}" {% if request.GET.student_class == student_class %}selected{% endif %}>
-                {{ student_class }}
-            </option>
+            {% for class in student_classes %}
+            <option value="{{ class }}" {% if request.GET.student_class == class %}selected{% endif %}>{{ class }}</option>
             {% endfor %}
         </select>
+        
 
-        <select name="status">
+        <select name="inquiry_source" class="searchable-select">
+            <option value="">All Sources</option>
+            {% for inquiry_source in inquiry_sources %}
+            <option value="{{ inquiry_source }}" {% if request.GET.inquiry_source == inquiry_source %}selected{% endif %}>{{ inquiry_source }}</option>
+            {% endfor %}
+        </select>
+        
+        
+        <select name="status" class="searchable-select">
             <option value="">All Statuses</option>
             {% for status in statuses %}
-            <option value="{{ status }}" {% if request.GET.status == status %}selected{% endif %}>
-                {{ status }}
-            </option>
+            <option value="{{ status }}" {% if request.GET.status == status %}selected{% endif %}>{{ status }}</option>
             {% endfor %}
         </select>
-
-        <select name="agent">
+        
+        <select name="agent" class="searchable-select">
             <option value="">All Agents</option>
             {% for agent in agents %}
-            <option value="{{ agent.id }}" {% if request.GET.agent == agent.id|stringformat:"s" %}selected{% endif %}>
-                {{ agent.name }}
-            </option>
+            <option value="{{ agent.id }}" {% if request.GET.agent == agent.id|stringformat:"s" %}selected{% endif %}>{{ agent.name }}</option>
             {% endfor %}
         </select>
-
+        
+        <input type="text" name="agent_email" placeholder="Agent Email" value="{{ request.GET.agent_email }}">
+        <input type="text" name="location_tag" placeholder="Location Tag" value="{{ request.GET.location_tag }}">
+        <input type="text" name="admin_name" placeholder="Admin Name" value="{{ request.GET.admin_name }}">
+        <input type="text" name="admin_email" placeholder="Admin Email" value="{{ request.GET.admin_email }}">
+    
+        <label>Inquiry Date:</label>
+        <input type="date" name="inquiry_date" value="{{ request.GET.inquiry_date }}">
+        
+        <label>Registration Date:</label>
+        <input type="date" name="registration_date" value="{{ request.GET.registration_date }}">
+        
+        <label>Admission Test Date:</label>
+        <input type="date" name="admission_test_date" value="{{ request.GET.admission_test_date }}">
+        
+        <label>Admission Offered Date:</label>
+        <input type="date" name="admission_offered_date" value="{{ request.GET.admission_offered_date }}">
+        
+        <label>Admission Confirmed Date:</label>
+        <input type="date" name="admission_confirmed_date" value="{{ request.GET.admission_confirmed_date }}">
+        
         <button type="submit">Filter</button>
         <a href="{% url 'inquiry_list' %}">Reset</a>
     </form>
+    
 
     <a href="{% url 'add_inquiry' %}">➕ Add New Inquiry</a>
+
+    <!-- Column Visibility Filters -->   
+    <div>
+        <h3>Show/Hide Columns:</h3>
+        <label><input type="checkbox" class="filter-checkbox" data-column="0" checked> Student Name</label>
+        <label><input type="checkbox" class="filter-checkbox" data-column="1" checked> Lead Email</label>
+        <label><input type="checkbox" class="filter-checkbox" data-column="2" checked> Parent Name</label>
+        <label><input type="checkbox" class="filter-checkbox" data-column="3" checked> Mobile Number</label>
+        <label><input type="checkbox" class="filter-checkbox" data-column="4" checked> Address</label>
+        <label><input type="checkbox" class="filter-checkbox" data-column="5" checked> Inquiry Source</label>
+        <label><input type="checkbox" class="filter-checkbox" data-column="6" checked> Student Class</label>
+        <label><input type="checkbox" class="filter-checkbox" data-column="7" checked> Follow-up Date</label>
+        <label><input type="checkbox" class="filter-checkbox" data-column="8" checked> Status</label>
+        <label><input type="checkbox" class="filter-checkbox" data-column="9" checked> Agent</label>
+        <label><input type="checkbox" class="filter-checkbox" data-column="10" checked> Agent Email</label>
+        <label><input type="checkbox" class="filter-checkbox" data-column="11" checked> Location Tag</label>
+        <label><input type="checkbox" class="filter-checkbox" data-column="12" checked> Admin Assigned</label>
+        <label><input type="checkbox" class="filter-checkbox" data-column="13" checked> Admin Email</label>
+        <label><input type="checkbox" class="filter-checkbox" data-column="14" checked> Actions</label>
+        <label><input type="checkbox" class="filter-checkbox" data-column="15" checked> Delete</label>
+    </div>
+
+    <!-- Export to excel -->
+    <a href="{% url 'export_inquiries_csv' %}">📥 Export to CSV</a>
+    <br>
 
     <!-- Inquiry Table -->
     <table id="inquiryTable">
         <thead>
             <tr>
-                <th onclick="sortTable(0)">Student Name <i class="fas fa-sort"></i></th>
-                <th onclick="sortTable(1)">Parent Name <i class="fas fa-sort"></i></th>
-                <th onclick="sortTable(2)">Mobile Number <i class="fas fa-sort"></i></th>
-                <th>Address</th>
-                <th>Inquiry Source</th>
-                <th onclick="sortTable(5)">Student Class <i class="fas fa-sort"></i></th>
-                <th>Follow-up Date</th>
-                <th>Status</th>
-                <th>Agent</th>
-                <th>Location Tag</th>
-                <th>Admin Assigned</th>
+                <th onclick="sortColumn(0)">Student Name <button class="sort-btn none" data-column="0" ></button></th>
+                <th onclick="sortColumn(1)">Lead Email <button class="sort-btn none" data-column="1"></button></th>
+                <th onclick="sortColumn(2)">Parent Name <button class="sort-btn none" data-column="2"></button></th>
+                <th onclick="sortColumn(3)">Mobile Number <button class="sort-btn none" data-column="3"></button></th>
+                <th onclick="sortColumn(4)">Address <button class="sort-btn none" data-column="4"></button></th>
+                <th onclick="sortColumn(5)">Inquiry Source <button class="sort-btn none" data-column="5"></button></th>
+                <th onclick="sortColumn(6)">Student Class <button class="sort-btn none" data-column="6"></button></th>
+                <th onclick="sortColumn(7)">Follow-up Date <button class="sort-btn none" data-column="7"></button></th>
+                <th onclick="sortColumn(8)">Status <button class="sort-btn none" data-column="8"></button></th>
+                <th onclick="sortColumn(9)">Agent <button class="sort-btn none" data-column="9"></button></th>
+                <th onclick="sortColumn(10)">Agent Email <button class="sort-btn none" data-column="10"></button></th>
+                <th onclick="sortColumn(11)">Location Tag <button class="sort-btn none" data-column="11"></button></th>
+                <th onclick="sortColumn(12)">Admin Assigned <button class="sort-btn none" data-column="12"></button></th>
+                <th onclick="sortColumn(13)">Admin Email <button class="sort-btn none" data-column="13"></button></th>
                 <th>Actions</th>
                 <th>Delete</th>
             </tr>
@@ -188,6 +281,7 @@
             {% for inquiry in inquiries %}
             <tr>
                 <td>{{ inquiry.student_name }}</td>
+                <td>{{ inquiry.email }}</td>
                 <td>{{ inquiry.parent_name }}</td>
                 <td>{{ inquiry.mobile_number }}</td>
                 <td>{{ inquiry.address }}</td>
@@ -196,8 +290,10 @@
                 <td>{{ inquiry.follow_up_date }}</td>
                 <td>{{ inquiry.status }}</td>
                 <td>{{ inquiry.assigned_agent.name|default:"UNASSIGNED" }}</td>
+                <td>{{ inquiry.assigned_agent.email|default:"NULL" }}</td>
                 <td>{{ inquiry.location_tag.name|default:"UNASSIGNED" }}</td>
                 <td>{{ inquiry.admin_assigned.username|default:"Not Assigned" }}</td>
+                <td>{{ inquiry.admin_assigned.email|default:"NULL" }}</td>
                 <td>
                     <a href="{% url 'update_status' inquiry.id %}">Manage</a>
                 </td>
@@ -207,34 +303,68 @@
             </tr>
             {% empty %}
             <tr>
-                <td colspan="13">No inquiries available.</td>
+                <td colspan="14">No inquiries available.</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
-
-    <a href="{% url 'export_inquiries_csv' %}">📥 Export to CSV</a>
+    
+    <a href="{% url 'dashboard' %}">Back to Dashboard</a>
 
     <script>
-        function sortTable(columnIndex) {
+        // Sorting function for columns
+        function sortColumn(columnIndex) {
             var table = document.getElementById("inquiryTable");
-            var rows = Array.from(table.rows).slice(1); // Exclude header row
-            var isAscending = table.dataset.sortOrder !== "asc";
+            var rows = Array.from(table.rows).slice(1);
+            var sortOrder = table.dataset.sortOrder === "asc" ? "desc" : "asc";
 
             rows.sort(function (rowA, rowB) {
                 var cellA = rowA.cells[columnIndex].textContent.trim().toLowerCase();
                 var cellB = rowB.cells[columnIndex].textContent.trim().toLowerCase();
 
                 if (!isNaN(cellA) && !isNaN(cellB)) {
-                    return isAscending ? cellA - cellB : cellB - cellA;
+                    return sortOrder === "asc" ? cellA - cellB : cellB - cellA;
                 }
-
-                return isAscending ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
+                return sortOrder === "asc" ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
             });
 
             table.tBodies[0].append(...rows);
-            table.dataset.sortOrder = isAscending ? "asc" : "desc";
+            table.dataset.sortOrder = sortOrder;
+
+            // Update sort button icons
+            updateSortButtons(columnIndex, sortOrder);
         }
+
+        // Update sorting buttons based on column and order
+        function updateSortButtons(columnIndex, sortOrder) {
+            var buttons = document.querySelectorAll('.sort-btn');
+            buttons.forEach(function(button) {
+                button.classList.remove('asc', 'desc', 'none');
+                button.classList.add('none');
+            });
+
+            var activeButton = buttons[columnIndex];
+            activeButton.classList.remove('none');
+            activeButton.classList.add(sortOrder);
+        }
+
+        // Column Visibility Toggle
+        $('.filter-checkbox').change(function() {
+            var columnIndex = $(this).data('column');
+            var isVisible = $(this).prop('checked');
+            $('#inquiryTable th:nth-child(' + (columnIndex + 1) + ')').toggleClass('hidden-column', !isVisible);
+            $('#inquiryTable td:nth-child(' + (columnIndex + 1) + ')').toggleClass('hidden-column', !isVisible);
+        });
+    </script>
+
+    <script>
+        // Apply Select2 to all searchable select elements
+        $(document).ready(function() {
+            $('.searchable-select').select2({
+                placeholder: 'Select an option',
+                allowClear: true
+            });
+        });
     </script>
 
 </body>
